@@ -1,14 +1,18 @@
 #include "msp.h"
 
+void Port2_Init(void);
+void Port5_Init(void);
+
 void main(void)
 {
     WDT_A->CTL = WDT_A_CTL_PW | WDT_A_CTL_HOLD;     // stop watchdog timer
 
-
-
     //enable port interrupts:
     NVIC->ISER[5] = (1 << ((PORT5_IRQn) & 31)); //enable Port 5 interrupt on the NVIC
     __enable_interrupt();
+
+    Port2_Init();
+    Port5_Init();
 
     while(1){
 
@@ -39,7 +43,10 @@ void Port5_Init(void){
 }
 
 void Port5_IRQHandler(void){
-    if(P5->IFG & BIT1) // If P1.1 had an interrupt (going from high to low
-        P2->OUT ^= BIT6; // Toggling the output on the LED
+    if(P5->IFG & BIT1){ // If P5.1 had an interrupt (going from high to low)
+        P2->OUT ^= BIT4; // Toggling the output on the LED
+        P2->OUT &= ~(BIT5 | BIT6);
+    }
+
     P5->IFG &= ~BIT1; // Reset the interrupt flag
 }
